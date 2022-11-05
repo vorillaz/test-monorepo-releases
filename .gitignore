@@ -31,3 +31,7 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+# Actions 
+release-version.txt
+release-gitTag.txt

@@ -14,6 +14,7 @@ Steps
 ```
     # root
     pnpm version 1.2.2 --no-git-tag-version
+    pnpm version 13.0.4-canary.0 --no-git-tag-version --workspaces-update=false --workspaces
 ```
 
 

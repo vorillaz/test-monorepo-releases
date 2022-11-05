@@ -1,0 +1,68 @@
+name: Versioning
+on:
+  push:
+    branches: [main, canary]
+
+jobs:
+  versioning:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+      currentVersion: ${{ steps.version.outputs.CURRENT_VERSION }}
+      isFromCi: ${{ steps.check-release.outputs.IS_FROM_CI }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 25
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+      - name: Check if commit is from CI
+        id: check-release
+        run: |
+          echo "::set-output name=IS_FROM_CI::$(echo ${{ github.event.head_commit.message }} | grep -qE '\[ci skip\]|\[skip ci\]' && echo true || echo false)"
+      - name: Exit if commit is from CI
+        if: steps.check-release.outputs.IS_FROM_CI == 'true'
+        run: exit 0
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run version bump in txt file
+        run: node scripts/version.js
+      - name: Get version from txt file
+        id: version
+        run: |
+          echo "::set-output name=VERSION::$(cat release-version.txt)"
+      - name: Cleanup txt files
+        run: |
+          rm release-version.txt
+          rm release-gitTag.txt
+
+      - name: Get current version from package.json
+        id: currentVersion
+        run: |
+          echo "::set-output name=CURRENT_VERSION::$(node -p "require('./package.json').version")"
+      - name: If version is the same as in package.json, exit
+        if: steps.version.outputs.VERSION == steps.currentVersion.outputs.CURRENT_VERSION
+        run: exit 0
+      - name: Authenticate the CI bot
+        run: |
+          git config user.name ProximaBot
+          git config user.email github-actions@github.com
+
+      - name: Update the version in monorepo root and packages
+        run: |
+          pnpm version ${{ steps.version.outputs.VERSION }}  --no-git-tag-version --workspaces-update=false --workspaces --include-workspace-root
+
+      - name: Commit changes to the branch
+        run: |
+          git add -A
+          git commit -m "[ci skip]: update version to ${{ steps.version.outputs.VERSION }}" --no-verify
+          git push origin HEAD:${{ github.head_ref }}
