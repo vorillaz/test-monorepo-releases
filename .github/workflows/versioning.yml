@@ -107,7 +107,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Validate in stdout
-        run: echo "${{ steps.version.outputs.VERSION }} is going to be published to NPM"
+        run: echo "${{ needs.versioning.outputs.VERSION }} is going to be published to NPM"
 
       # - name: Build Particle
       #   run: pnpm run build --filter="@prxm/particles"
