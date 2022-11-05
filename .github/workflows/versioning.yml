@@ -65,4 +65,4 @@ jobs:
         run: |
           git add -A
           git commit -m "[ci skip]: update version to ${{ steps.version.outputs.VERSION }}" --no-verify
-          git push origin HEAD:${{ github.head_ref }}
+          git push
