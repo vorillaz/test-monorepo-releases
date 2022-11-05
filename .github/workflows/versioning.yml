@@ -25,7 +25,7 @@ jobs:
       - name: Check if commit is from CI
         id: check-release
         run: |
-          echo "::set-output name=IS_FROM_CI::$(echo ${{ github.event.head_commit.message }} | grep -qE '\[ci skip\]|\[skip ci\]' && echo true || echo false)"
+          echo "::set-output name=IS_FROM_CI::$(echo '${{ github.event.head_commit.message }}' | grep -qE '\[ci skip\]|\[skip ci\]' && echo true || echo false)"
       - name: Exit if commit is from CI
         if: steps.check-release.outputs.IS_FROM_CI == 'true'
         run: exit 0
