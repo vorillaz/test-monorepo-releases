@@ -22,22 +22,28 @@ jobs:
       - uses: pnpm/action-setup@v2.2.4
         with:
           version: 7
+
       - name: Check if commit is from CI
         id: check-release
         run: |
           echo "{IS_FROM_CI}={$(echo '${{ github.event.head_commit.message }}' | grep -qE '\[ci skip\]|\[skip ci\]' && echo true || echo false)}"
+
       - name: Exit if commit is from CI
         if: steps.check-release.outputs.IS_FROM_CI == 'true'
         run: exit 0
+
       - name: Use Node.js 16
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install
+
       - name: Run version bump in txt file
         run: node scripts/version.js
+
       - name: Get version from txt file
         id: version
         run: |
@@ -52,9 +58,11 @@ jobs:
         id: currentVersion
         run: |
           echo "{CURRENT_VERSION}={$(node -p "require('./package.json').version")}"
+
       - name: If version is the same as in package.json, exit
         if: steps.version.outputs.VERSION == steps.currentVersion.outputs.CURRENT_VERSION
         run: exit 0
+
       - name: Authenticate the CI bot
         run: |
           git config user.name ProximaBot
