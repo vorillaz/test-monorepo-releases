@@ -26,7 +26,7 @@ jobs:
       - name: Check if commit is from CI
         id: check-release
         run: |
-          echo "{IS_FROM_CI}={$(echo '${{ github.event.head_commit.message }}' | grep -qE '\[ci skip\]|\[skip ci\]' && echo true || echo false)}"
+          echo "IS_FROM_CI={$(echo '${{ github.event.head_commit.message }}' | grep -qE '\[ci skip\]|\[skip ci\]' && echo true || echo false)}" >> $GITHUB_OUTPUT
 
       - name: Exit if commit is from CI
         if: steps.check-release.outputs.IS_FROM_CI == 'true'
@@ -47,7 +47,7 @@ jobs:
       - name: Get version from txt file
         id: version
         run: |
-          echo "{VERSION}={$(cat next-release-version.txt)}" >> $GITHUB_OUTPUT
+          echo "VERSION={$(cat next-release-version.txt)}" >> $GITHUB_OUTPUT
 
       - name: Cleanup txt files
         run: |
@@ -57,7 +57,7 @@ jobs:
       - name: Get current version from package.json
         id: currentVersion
         run: |
-          echo "{CURRENT_VERSION}={$(node -p "require('./package.json').version")}" >> $GITHUB_OUTPUT
+          echo "CURRENT_VERSION={$(node -p "require('./package.json').version")}" >> $GITHUB_OUTPUT
 
       - name: If version is the same as in package.json, exit
         if: steps.version.outputs.VERSION == steps.currentVersion.outputs.CURRENT_VERSION
