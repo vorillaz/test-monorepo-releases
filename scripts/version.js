@@ -1,6 +1,6 @@
 const fs = require("fs");
-
 const semanticRelease = require("semantic-release");
+
 (async function () {
   try {
     const result = await semanticRelease({

@@ -11,6 +11,8 @@ jobs:
       currentVersion: ${{ steps.version.outputs.CURRENT_VERSION }}
       isFromCi: ${{ steps.check-release.outputs.IS_FROM_CI }}
     steps:
+      - name: Setup Github Token as env
+        run: echo "GH_TOKEN=${{ secrets.GH_TOKEN }}" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           fetch-depth: 25
@@ -66,3 +68,6 @@ jobs:
           git add -A
           git commit -m "[ci skip]: update version to ${{ steps.version.outputs.VERSION }}" --no-verify
           git push
+
+      - name: Bundle and push the release to GitHub
+        run: node scripts/release.js
